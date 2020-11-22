@@ -18,6 +18,17 @@ data.T0_idx = data.x1_idx(end) + 1;
 data.T_idx  = data.T0_idx + 1;
 data.p_idx  = data.T_idx + (1:data.pdim);
 
+if data.order==2
+    assert(mod(data.dim,2)==0, 'state is of even dimension for second order system');
+    dim = data.dim/2;
+    data.u0_idx = 1:dim;
+    data.v0_idx = dim+1:2*dim;
+    data.u1_idx = 2*dim+1:3*dim;
+    data.v1_idx = 3*dim+1:4*dim;
+end
+
+
+
 % data = coco_func_data(data);
 
 end

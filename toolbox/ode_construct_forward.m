@@ -38,49 +38,63 @@ T0 = u(data.T0_idx);
 T  = u(data.T_idx);
 p  = u(data.p_idx);
 
-if nargout<3
-  if data.autonomous
-    f = @(t,x) data.f(x, p);
-  else
-    f = @(t,x) data.f(t, x, p);
-  end
-  
-  [~, x] = data.ODEsolver(f, [T0 T0+T], x0, data.ode_opts);
-  
-  y = x(end,:)' - x1;
+if data.MATLABsolver
+    if nargout<3
+      if data.autonomous
+        f = @(t,x) data.f(x, p);
+      else
+        f = @(t,x) data.f(t, x, p);
+      end
+
+      [~, x] = data.ODEsolver(f, [T0 T0+T], x0, data.ode_opts);
+
+      y = x(end,:)' - x1;
+    else
+    %     tic
+      m  = data.dim;
+      n  = data.pdim;
+      if data.autonomous
+          f0 = data.f(x0, p);
+      else
+          f0 = data.f(T0, x0, p);
+      end
+      M0 = [x0 eye(m,m) -f0 zeros(m,n)]; % x, \partial_x0, \partial_T0, \partial_p
+      f  = @(t,M) VarEQN(data, m, n, t, M, p);
+
+      [~, x] = data.ODEsolver(f, [T0 T0+T], M0(:), data.ode_opts);
+
+      M1 = x(end,:);
+      y  = M1(1:m)' - x1;
+      Jx = reshape(M1(m+1:m+m*m), m, m);
+      JT0 = M1(m+m*m+1:2*m+m*m)';
+      if data.autonomous
+        JT  = data.f(M1(1:m)', p);
+      else
+        JT  = data.f(T0+T, M1(1:m)', p);
+      end
+      JT0 = JT0 + JT;
+      Jp  = reshape(M1(2*m+m*m+1:end), m, n);
+      J   = [ Jx -eye(m,m) JT0 JT Jp ];
+    %   toc
+    %   
+    %   tic
+    %   [~,Jnumer] = coco_ezDFDX('f(o,d,x)', prob, data, @forwardy, u);
+    %   toc
+    %   max(abs(J(:)-Jnumer(:)))
+    end
 else
-%     tic
-  m  = data.dim;
-  n  = data.pdim;
-  if data.autonomous
-      f0 = data.f(x0, p);
-  else
-      f0 = data.f(T0, x0, p);
-  end
-  M0 = [x0 eye(m,m) -f0 zeros(m,n)]; % x, \partial_x0, \partial_T0, \partial_p
-  f  = @(t,M) VarEQN(data, m, n, t, M, p);
-  
-  [~, x] = data.ODEsolver(f, [T0 T0+T], M0(:), data.ode_opts);
-  
-  M1 = x(end,:);
-  y  = M1(1:m)' - x1;
-  Jx = reshape(M1(m+1:m+m*m), m, m);
-  JT0 = M1(m+m*m+1:2*m+m*m)';
-  if data.autonomous
-    JT  = data.f(M1(1:m)', p);
-  else
-    JT  = data.f(T0+T, M1(1:m)', p);
-  end
-  JT0 = JT0 + JT;
-  Jp  = reshape(M1(2*m+m*m+1:end), m, n);
-  J   = [ Jx -eye(m,m) JT0 JT Jp ];
-%   toc
-%   
-%   tic
-%   [~,Jnumer] = coco_ezDFDX('f(o,d,x)', prob, data, @forwardy, u);
-%   toc
-%   max(abs(J(:)-Jnumer(:)))
-  
+    switch data.order
+        case 1
+            [xend,Js] = data.ODEsolver(data.f, data.fx, data.fp, T0, T, ...
+                x0, p, data.autonomous, data.ode_opts);
+            % more to come   
+            
+        case 2
+            [xend,Js] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
+                data.F, data.Ft, data.Fp, data.ode_opts);
+            % more to come
+            
+    end
 end
 
 end
