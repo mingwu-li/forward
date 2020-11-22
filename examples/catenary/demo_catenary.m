@@ -1,4 +1,4 @@
-coco_use_recipes_toolbox forward_v2 % add the coll_v1 toolbox to the search path
+% coco_use_recipes_toolbox forward_v2 % add the coll_v1 toolbox to the search path
 
 %% Section 7.3.1
 
