@@ -15,7 +15,10 @@ function data = forward_get_settings(prob, tbid, data)
 defaults.autonomous = true;
 defaults.order     = 1;
 defaults.ODEsolver = @ode45; % use ode45 by default and define solver options
-defaults.ode_opts  = odeset('RelTol', 1.0e-8, 'AbsTol', 1.0e-10, 'NormControl', 'on');
+ode_opts           = odeset('RelTol', 1.0e-8, 'AbsTol', 1.0e-10, 'NormControl', 'on');
+ode_opts.ItMX      = 10;
+ode_opts.Nsteps    = 1000;
+defaults.ode_opts  = ode_opts;
 
 copts = coco_get(prob, tbid);
 copts = coco_merge(defaults, copts);
@@ -38,5 +41,8 @@ if flag
     data.MATLABsolver = true;
 else
     data.MATLABsolver = false;
+end
+if data.order==2
+    assert(~data.MATLABsolver,'MATLAB solver does not support 2nd order system');
 end
 end

@@ -87,13 +87,28 @@ else
         case 1
             [xend,Js] = data.ODEsolver(data.f, data.fx, data.fp, T0, T, ...
                 x0, p, data.autonomous, data.ode_opts);
-            % more to come   
+            
+            y = xend-x1;
+            if data.autonomous
+                JT = data.f(xend,p);
+            else
+                JT = data.f(T0+T,xend,p);
+            end
+            JT0 = Js(:,1)+JT;
+            Jx0 = Js(:,2:data.dim+1);
+            Jp  = Js(:,data.dim+2:end);
+            J   = [Jx0 -eye(data.dim) JT0 JT Jp];
             
         case 2
-            [xend,Js] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
-                data.F, data.Ft, data.Fp, data.ode_opts);
-            % more to come
-            
+            [uend,vend,Jup,Jvp] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
+                data.F, data.Fp, T0, T, x0, p, data.ode_opts);
+            % rewrite results in first-order form
+            y   = [uend;vend]-x1;
+            JT  = [vend; data.M\(data.F(T0+T,p)-data.N(uend,vend))];
+            JT0 = [Jup(:,1); Jvp(:,1)]+JT;
+            Jx0 = [Jup(:,2:data.dim+1); Jvp(:,2:data.dim+1)];
+            Jp  = [Jup(:,data.dim+2:end); Jvp(:,data.dim+2:end)];
+            J   = [Jx0 -eye(data.dim) JT0 JT Jp];
     end
 end
 
