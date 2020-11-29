@@ -50,7 +50,6 @@ if data.MATLABsolver
 
       y = x(end,:)' - x1;
     else
-    %     tic
       m  = data.dim;
       n  = data.pdim;
       if data.autonomous
@@ -75,12 +74,6 @@ if data.MATLABsolver
       JT0 = JT0 + JT;
       Jp  = reshape(M1(2*m+m*m+1:end), m, n);
       J   = [ Jx -eye(m,m) JT0 JT Jp ];
-    %   toc
-    %   
-    %   tic
-    %   [~,Jnumer] = coco_ezDFDX('f(o,d,x)', prob, data, @forwardy, u);
-    %   toc
-    %   max(abs(J(:)-Jnumer(:)))
     end
 else
     switch data.order
@@ -100,18 +93,24 @@ else
             J   = [Jx0 -eye(data.dim) JT0 JT Jp];
             
         case 2
-            [uend,vend,Jup,Jvp] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
-                data.F, data.Fp, T0, T, x0, p, data.ode_opts);
-            % rewrite results in first-order form
-            y   = [uend;vend]-x1;
-            JT  = [vend; data.M\(data.F(T0+T,p)-data.N(uend,vend))];
-            JT0 = [Jup(:,1); Jvp(:,1)]+JT;
-            Jx0 = [Jup(:,2:data.dim+1); Jvp(:,2:data.dim+1)];
-            Jp  = [Jup(:,data.dim+2:end); Jvp(:,data.dim+2:end)];
-            J   = [Jx0 -eye(data.dim) JT0 JT Jp];
+            if nargout<3
+                [uend,vend] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
+                    data.F, data.Fp, T0, T, x0, p, data.ode_opts);
+                % rewrite results in first-order form
+                y   = [uend;vend]-x1;                
+            else
+                [uend,vend,Jup,Jvp] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
+                    data.F, data.Fp, T0, T, x0, p, data.ode_opts, 'var');
+                % rewrite results in first-order form
+                y   = [uend;vend]-x1;
+                JT  = [vend; data.M\(data.F(T0+T,p)-data.N(uend,vend))];
+                JT0 = [Jup(:,1); Jvp(:,1)]+JT;
+                Jx0 = [Jup(:,2:data.dim+1); Jvp(:,2:data.dim+1)];
+                Jp  = [Jup(:,data.dim+2:end); Jvp(:,data.dim+2:end)];
+                J   = [Jx0 -eye(data.dim) JT0 JT Jp];
+            end
     end
 end
-
 end
 
 function y = VarEQN(data, m, n, t, xx, p)
@@ -129,24 +128,3 @@ else
 end
 y  = y(:);
 end
-
-
-function [data, y] = forwardy(prob, data, u) %#ok<INUSL>
-x0 = u(data.x0_idx);
-x1 = u(data.x1_idx);
-T0 = u(data.T0_idx);
-T  = u(data.T_idx);
-p  = u(data.p_idx);
-
-if data.autonomous
-f = @(t,x) data.f(x, p);
-else
-f = @(t,x) data.f(t, x, p);
-end
-
-[~, x] = data.ODEsolver(f, [T0 T0+T], x0, data.ode_opts);
-
-y = x(end,:)' - x1;
-
-end
-

@@ -1,4 +1,4 @@
-function [up,vp,Jup,Jvp,varargout] = Newmark(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varargin)
+function [up,vp,varargout] = Newmark(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varargin)
 % NEWMARK This function returns the final state of IVP: 
 %      M\ddot{u}+N(u,\dot{u})=F(t,p) [u0,v0]=x0
 % and the sensitivity of final state with respect to x0
@@ -6,7 +6,7 @@ function [up,vp,Jup,Jvp,varargout] = Newmark(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varar
 % respect to x0, T0, T and p. The numerical integration used here is
 % Newmark method.
 %
-% [U,V,JU,JV,VARARGOUT] = NEWMARK(M,N,NU,NV,F,FP,T0,T,X0,P,OPTS,VARARGIN)
+% [U,V,VARARGOUT] = NEWMARK(M,N,NU,NV,F,FP,T0,T,X0,P,OPTS,VARARGIN)
 %
 % M:    mass matrix
 % N:    function handle for nonlinear internal force N(u,v)
@@ -18,10 +18,13 @@ function [up,vp,Jup,Jvp,varargout] = Newmark(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varar
 % T:    length of time horizon
 % p:    problem parameters
 % opts: algorithm parameters for integration
+% varargin: ['var'], [outdof]; 'var' indicates sensitivity matrices will be
+%       calculated. outdof indicates the time history at these dofs will be
+%       saved to traj
 %
-% xa and Ja are the final state and its sensitivity respectively. Based on
-% the info of varargin, the time history of the system is presented in
-% varargout as well.
+% (up,vp) is the final state. Based on the info of varargin, the
+% sensitivity of final state and the time history of the system is presented
+% in varargout.
 
 ItMX   = opts.ItMX;
 Nsteps = opts.Nsteps;
@@ -34,14 +37,40 @@ qdim = numel(p);    % number of parameters
 up   = x0(1:dim);
 vp   = x0(dim+1:2*dim);
 ap   = M\(F(T0,p)-N(up,vp));
-Jup  = [-vp,eye(dim),zeros(dim),zeros(dim,qdim)];
-Jvp  = [-ap,zeros(dim),eye(dim),zeros(dim,qdim)];
-f0   = [zeros(dim,1),zeros(dim,2*dim),Fp(T0,p)];
-Jap  = M\(f0-Nv(up,vp)*Jvp-Nu(up,vp)*Jup);
 
+var  = false;
+traj = false;
 if ~isempty(varargin)
-    ut = zeros(dim,Nsteps+1);
-    ut(:,1) = up;
+    arg1 = varargin{1};
+    if ischar(arg1) && strcmp(arg1,'var')
+        var = true;
+    else
+        if isnumeric(arg1)
+            traj   = true;
+            outdof = arg1;
+        end
+    end
+    if numel(varargin)>1
+        arg2 = varargin{2};
+        if isnumeric(arg2)
+            traj   = true;
+            outdof = arg2;
+        end
+    end
+end
+
+if var
+    Jup  = [-vp,eye(dim),zeros(dim),zeros(dim,qdim)];
+    Jvp  = [-ap,zeros(dim),eye(dim),zeros(dim,qdim)];
+    f0   = [zeros(dim,1),zeros(dim,2*dim),Fp(T0,p)];
+    Jap  = M\(f0-Nv(up,vp)*Jvp-Nu(up,vp)*Jup);
+end
+
+if traj
+    ndofs  = numel(outdof);
+    zt = zeros(ndofs,Nsteps+1);
+    zp = [up;vp];
+    zt(:,1) = zp(outdof);
 end
 for i=1:Nsteps
     ti = T0+i*dt;
@@ -69,27 +98,43 @@ for i=1:Nsteps
         assert(ik<ItMX,'Newton-Raphson does not coverge');
         ik = ik+1;
     end
-    % update sensitivity matrix
-    Justar = Jup+dt*Jvp+(0.5-beta)*dt^2*Jap;
-    Jvstar = Jvp+(1-gamma)*dt*Jap;
-    S   = M/(beta*dt^2)+gamma*Nv(uc,vc)/(beta*dt)+Nu(uc,vc);
-    Fc  = [zeros(dim,1),zeros(dim,2*dim),Fp(ti,p)];
-    Juc = S\(Fc+M*Justar/(beta*dt^2)+Nv(uc,vc)*(gamma/(beta*dt)*Justar-Jvstar));
-    Jvc = Jvstar+gamma/(beta*dt)*(Juc-Justar);
-    Jac = (Juc-Justar)/(beta*dt^2);
+    if var
+        % update sensitivity matrix
+        Justar = Jup+dt*Jvp+(0.5-beta)*dt^2*Jap;
+        Jvstar = Jvp+(1-gamma)*dt*Jap;
+        S   = M/(beta*dt^2)+gamma*Nv(uc,vc)/(beta*dt)+Nu(uc,vc);
+        Fc  = [zeros(dim,1),zeros(dim,2*dim),Fp(ti,p)];
+        Juc = S\(Fc+M*Justar/(beta*dt^2)+Nv(uc,vc)*(gamma/(beta*dt)*Justar-Jvstar));
+        Jvc = Jvstar+gamma/(beta*dt)*(Juc-Justar);
+        Jac = (Juc-Justar)/(beta*dt^2);
+    end
     % update results
     up  = uc;
     vp  = vc;
     ap  = ac;
-    Jup = Juc;
-    Jvp = Jvc;
-    Jap = Jac;
-    if ~isempty(varargin)
-        ut(:,i+1) = up;
+    if var
+        Jup = Juc;
+        Jvp = Jvc;
+        Jap = Jac;
+    end
+    if traj
+        zp = [up;vp];
+        zt(:,i+1) = zp(outdof);
     end
 end
-if ~isempty(varargin)
-    varargout{1} = ut;
+
+if var && traj
+    varargout{1} = Jup;
+    varargout{2} = Jvp;
+    varargout{3} = zt;
+else
+    if var
+        varargout{1} = Jup;
+        varargout{2} = Jvp;
+    end
+    if traj
+        varargout{1} = zt;
+    end
 end
 
 end

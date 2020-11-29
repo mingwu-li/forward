@@ -15,9 +15,9 @@ function data = forward_get_settings(prob, tbid, data)
 defaults.autonomous = true;
 defaults.order     = 1;
 defaults.ODEsolver = @ode45; % use ode45 by default and define solver options
-ode_opts           = odeset('RelTol', 1.0e-8, 'AbsTol', 1.0e-10, 'NormControl', 'on');
+ode_opts           = odeset('RelTol', 1.0e-6, 'AbsTol', 1.0e-8, 'NormControl', 'on');
 ode_opts.ItMX      = 10;
-ode_opts.Nsteps    = 1000;
+ode_opts.Nsteps    = 500;
 defaults.ode_opts  = ode_opts;
 
 copts = coco_get(prob, tbid);
