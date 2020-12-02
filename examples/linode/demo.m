@@ -10,6 +10,9 @@ f = @(t,x) linode(t, x, p0);
 x1 = x0;
 prob = coco_prob();
 prob = coco_set(prob, 'forward', 'autonomous', false);
+ode_opts.RelTol  = 1e-6;
+ode_opts.Nsteps  = 10000;
+prob = coco_set(prob,'forward','ode_opts',ode_opts,'ODEsolver',@implicit_euler);
 prob = ode_isol2forward(prob, '', @linode, @linode_dx,...
     @linode_dp, T0, T, x0, x1, {'k' 'th'}, [0.98; 0.3]);
 

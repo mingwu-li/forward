@@ -16,8 +16,9 @@ defaults.autonomous = true;
 defaults.order     = 1;
 defaults.ODEsolver = @ode45; % use ode45 by default and define solver options
 ode_opts           = odeset('RelTol', 1.0e-6, 'AbsTol', 1.0e-8, 'NormControl', 'on');
-ode_opts.ItMX      = 10;
-ode_opts.Nsteps    = 500;
+ode_opts.ItMX      = 10;  % max number of iteration of Newton iteration
+ode_opts.Nsteps    = 500; % number of steps in numerical integration
+ode_opts.alpha     = 0;   % parameter used in Newmark integration scheme
 defaults.ode_opts  = ode_opts;
 
 copts = coco_get(prob, tbid);
