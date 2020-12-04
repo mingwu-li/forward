@@ -19,6 +19,7 @@ ode_opts           = odeset('RelTol', 1.0e-6, 'AbsTol', 1.0e-8, 'NormControl', '
 ode_opts.ItMX      = 10;  % max number of iteration of Newton iteration
 ode_opts.Nsteps    = 500; % number of steps in numerical integration
 ode_opts.alpha     = 0;   % parameter used in Newmark integration scheme
+ode_opts.rhoinf    = 0.9; % parameter used in Galpha integration scheme
 defaults.ode_opts  = ode_opts;
 
 copts = coco_get(prob, tbid);
