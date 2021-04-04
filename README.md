@@ -1,4 +1,4 @@
-# Shooting toolbox for dynamical systems
+# A COCO-based shooting toolbox for dynamical systems
 
 This repo presents a shooting toolbox for autonomous and non-autonomous dynamical systems.
 
