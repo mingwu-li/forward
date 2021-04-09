@@ -12,6 +12,15 @@ This toolbox can be used to solve two-point boundary-value problems with arbitra
 
 This toolbox is developed in the platform COCO (continuation core). For more details about COCO, please refer to [3-4]. 
 
+When you use this toolbox and want to cite it, you may use the following
+
+`<@misc{coco-shoot,
+  author = {Li, Mingwu and Dankowicz, Harry},
+  title = {A {COCO}-based shooting toolbox for dynamical systems},
+  howpublished = {\url{https://github.com/mingwu-li/forward}},
+  note = {Accessed: xxxx-xx-xx}
+}>`
+
 ## References
 [1] Li, M., & Dankowicz, H. (2018). Staged construction of adjoints for constrained optimization of integro-differential boundary-value problems. SIAM Journal on Applied Dynamical Systems, 17(2), 1117-1151.
 
