@@ -69,8 +69,10 @@ end
 if traj
     ndofs  = numel(outdof);
     zt = zeros(ndofs,Nsteps+1);
+    Et = zeros(1,Nsteps+1); % output of kinetic energy
     zp = [up;vp];
     zt(:,1) = zp(outdof);
+    Et(1)   = vp'*M*vp/2;
 end
 for i=1:Nsteps
     ti = T0+i*dt;
@@ -120,6 +122,7 @@ for i=1:Nsteps
     if traj
         zp = [up;vp];
         zt(:,i+1) = zp(outdof);
+        Et(i+1) = vp'*M*vp/2;
     end
 end
 
@@ -127,6 +130,7 @@ if var && traj
     varargout{1} = Jup;
     varargout{2} = Jvp;
     varargout{3} = zt;
+    varargout{4} = Et;
 else
     if var
         varargout{1} = Jup;
@@ -134,6 +138,7 @@ else
     end
     if traj
         varargout{1} = zt;
+        varargout{2} = Et;
     end
 end
 
