@@ -8,7 +8,7 @@ It supports dynamical systems in both the first-order and the second-order forms
 
 Automatic construction of adjoints for first-order systems is supported as well. Please refer to [1-2] for more details about the automatic generation of adjoints.
 
-This toolbox can be used to solve two-point boundary-value problems with arbitrary boundary conditions. For example, it can be used to perform the continuation of periodic orbits.
+This toolbox can be used to solve two-point boundary-value problems with arbitrary boundary conditions. For example, it can be used to perform the continuation of periodic orbits. The variational equations are solved as a by product to obtain the Jacobian for the iterations of fixed points of Poincare maps. *Applications of this toolbox for computing the forced response curves of high-dimensional mechanical systems with distributed nonlinearities can be found in [5-6] (1320 DOFs)*.
 
 This toolbox is developed in the platform COCO (continuation core). For more details about COCO, please refer to [3-4]. 
 
@@ -29,3 +29,7 @@ When you use this toolbox and want to cite it, you may use the following
 [3] https://sourceforge.net/projects/cocotools/
 
 [4] Dankowicz, H., & Schilder, F. (2013). Recipes for continuation. Society for Industrial and Applied Mathematics.
+
+[5] Jain, S., & Haller, G. (2022). How to compute invariant manifolds and their reduced dynamics in high-dimensional finite element models. Nonlinear dynamics, 107(2), 1417-1450.
+
+[6] Li, M., Jain, S., & Haller, G. (2021). Nonlinear analysis of forced mechanical systems with internal resonance using spectral submanifolds--Part I: Periodic response and forced response curve. arXiv preprint arXiv:2106.05162.
