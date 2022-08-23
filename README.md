@@ -30,6 +30,6 @@ When you use this toolbox and want to cite it, you may use the following
 
 [4] Dankowicz, H., & Schilder, F. (2013). Recipes for continuation. Society for Industrial and Applied Mathematics.
 
-[5] Jain, S., & Haller, G. (2022). How to compute invariant manifolds and their reduced dynamics in high-dimensional finite element models. Nonlinear dynamics, 107(2), 1417-1450.
+[5] Jain, S., & Haller, G. (2022). How to compute invariant manifolds and their reduced dynamics in high-dimensional finite element models. Nonlinear Dynamics, 107(2), 1417-1450.
 
-[6] Li, M., Jain, S., & Haller, G. (2021). Nonlinear analysis of forced mechanical systems with internal resonance using spectral submanifolds--Part I: Periodic response and forced response curve. arXiv preprint arXiv:2106.05162.
+[6] Li, M., Jain, S., & Haller, G. (2022). Nonlinear analysis of forced mechanical systems with internal resonance using spectral submanifolds, Part I: Periodic response and forced response curve. Nonlinear Dynamics. https://doi.org/10.1007/s11071-022-07714-x
