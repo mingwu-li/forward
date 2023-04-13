@@ -4,7 +4,7 @@ This repo presents a shooting toolbox for autonomous and non-autonomous dynamica
 
 It supports dynamical systems in both the first-order and the second-order forms. In particular, 
 * For first-order systems, numerical integration solvers of MATLAB are used for performing forward simulation. 
-* For second-order systems, Generalized alpha and Newmark integration schemes are used for performing forward simulation.
+* For second-order systems, Generalized alpha and Newmark integration schemes combined with Newton's iteration are used for performing forward simulation.
 
 Automatic construction of adjoints for first-order systems is supported as well. Please refer to [1-2] for more details about the automatic generation of adjoints.
 
