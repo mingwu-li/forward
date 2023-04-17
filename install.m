@@ -2,6 +2,7 @@ function install
 cocodir = fileparts(mfilename('fullpath'));
 addpath(fullfile(cocodir, 'toolbox'));
 addpath(fullfile(cocodir, 'toolbox', 'ODEsolvers'));
+addpath(fullfile(cocodir, 'toolbox', 'myChebfun'));
 end
 
 % function startup

@@ -21,3 +21,5 @@ set(gca,'LineWidth',1.5);
 set(gca,'FontSize', 14);
 xlabel('Expansion terms $q$','interpreter','laTex')
 ylabel('$|J-J_{\mathrm{exact}}|/|J_{\mathrm{exact}}|$','interpreter','laTex')
+
+

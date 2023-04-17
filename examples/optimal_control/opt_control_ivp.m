@@ -1,4 +1,4 @@
-function y=opt_control_ivp(nterm)
+function y=opt_control_ivp(nterm,varargin)
 
 global ncheb tT
 ncheb = nterm; tT=1;
@@ -172,24 +172,17 @@ xe = 4./(1+3*exp(5));                                   % state
 y2 = abs(xe-sol.x1)/xe;
 y=[y1;y2];
 
-% xe = 4./(1+3*exp(2.5*tp));
-% ue = xe/2;                                                   % control input
-% le = -exp(2*log(1+3*exp(5*tp/2))-5*t/2)/(exp(-5)+6+9*exp(5));% costate
-% figure(1)
-% plot(tp,ue,'b-');
-% xlabel('t');
-% ylabel('control input')
-% legend('numerical','exact');
-% figure(2)
-% plot(tp,xe,'b-');
-% xlabel('t');
-% ylabel('state variable')
-% legend('numerical','exact');
-% figure(3)
-% plot(tp,le,'b-');
-% xlabel('t');
-% ylabel('costate variable')
-% legend('numerical','exact');
+if numel(varargin)>0
+    xe = 4./(1+3*exp(2.5*tp));
+    ue = xe/2;                                                   % control input
+    figure(11); hold on
+    plot(tp,u,'ro');
+    plot(tp,ue,'b-'); 
+    xlabel('t');
+    ylabel('control input')
+    legend('numerical','exact');
+end
+
 
 end
 

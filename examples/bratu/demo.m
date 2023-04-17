@@ -10,6 +10,7 @@ p0 = 0;
 
 prob = coco_prob();
 prob = coco_set(prob, 'cont', 'NPR', 20);
+prob = coco_set(prob, 'corr', 'TOL', 1e-4);
 % Initial solution guess is the trivial solution u = 0 for p = 0.
 prob = ode_isol2forward(prob, '', @brat, @brat_dx,...
     @brat_dp, T0, T, x0, x1, {'p'}, p0);
@@ -20,10 +21,14 @@ prob = coco_add_func(prob, 'bc', bc_funcs{:}, [], 'zero', 'uidx', ...
 
 fprintf('\n Run=''%s'': Continue family of constrained trajectory segments.\n', ...
   'shoot1');
-coco(prob, 'shoot1', [], 1, {'p'}, [0 4]);
+bd1 = coco(prob, 'shoot1', [], 1, {'p'}, [0 4]);
+
+% Graphical representation
+
 
 %% Continuation in alternative parameterization with branch point
 prob = coco_prob();
+prob = coco_set(prob, 'corr', 'TOL', 1e-4);
 prob = coco_set(prob, 'cont', 'BP', true);
 % Initial solution guess is the trivial solution u = 0 for p = 0.
 prob = ode_isol2forward(prob, '', @brat, @brat_dx,...
@@ -43,6 +48,7 @@ bd2 = coco(prob, 'shoot2', [], 1, {'C' 'p'}, [0 5]);
 
 BPlab = coco_bd_labs(bd2, 'BP');
 prob = coco_prob();
+prob = coco_set(prob, 'corr', 'TOL', 1e-4);
 prob = coco_set(prob, 'cont', 'BP', true);
 % Initial solution guess is the trivial solution u = 0 for p = 0.
 prob = ode_BP2forward(prob, '', 'shoot2', BPlab);
