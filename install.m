@@ -3,6 +3,8 @@ cocodir = fileparts(mfilename('fullpath'));
 addpath(fullfile(cocodir, 'toolbox'));
 addpath(fullfile(cocodir, 'toolbox', 'ODEsolvers'));
 addpath(fullfile(cocodir, 'toolbox', 'myChebfun'));
+addpath(fullfile(cocodir, 'toolbox', 'misc'));
+
 end
 
 % function startup
