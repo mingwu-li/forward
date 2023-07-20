@@ -19,3 +19,19 @@ odefun = @(t,x) duffing(t,x,omsamp);
 [ts,xt] = ode45(odefun,[0,2*pi/omsamp],xinit);
 figure; plot(ts,xt);
 figure; plot(xt(:,1),xt(:,2))
+
+% for-loop to yield FRC
+amp = zeros(15,1);
+oms = zeros(15,1);
+for k=1:15
+    sol = coco_read_solution('forward_map','run1',k,'chart');
+    xinit  = sol.x(1:2);
+    omsamp = sol.x(3);
+    odefun = @(t,x) duffing(t,x,omsamp);
+    [ts,xt] = ode45(odefun,[0,2*pi/omsamp],xinit);
+    oms(k) = omsamp;
+    amp(k) = max(abs(xt(:,1)));
+end
+
+figure; 
+plot(oms,amp,'ro');
