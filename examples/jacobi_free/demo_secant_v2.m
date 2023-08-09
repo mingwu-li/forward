@@ -1,7 +1,7 @@
 % a brief demo
-
+% in this version, we use JFNK as nonlinear solver
 x0 = zeros(2,1); om0 = 0.1; dom = 0.01; omend = 1.6; R = 0.08;
-y = secant_arclength_cont(x0,om0,dom,omend,R,@fsolve);
+y = secant_arclength_cont(x0,om0,dom,omend,R,@JFNK);
 
 % calculate amplitude of each periodic orbit
 npts = size(y,2);

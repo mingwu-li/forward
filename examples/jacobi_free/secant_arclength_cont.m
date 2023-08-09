@@ -1,4 +1,4 @@
-function y = secant_arclength_cont(x0,om0,dom,omend,R)
+function y = secant_arclength_cont(x0,om0,dom,omend,R,solver)
 % we note that coco use pseudo-arclength method to perform numerical
 % continuation. The predictor then asks for tangent direction, which
 % involves the jacobi of the zero problem. The computation of this jacobi
@@ -10,11 +10,11 @@ function y = secant_arclength_cont(x0,om0,dom,omend,R)
 % first point - at om = om0
 u0 = [x0;om0];
 eq_type1 = @(x) non_eqs(x,[],om0);
-u1 = fsolve(eq_type1,u0);
+u1 = solver(eq_type1,u0);
 
 % second point - at om = om0+dom
 eq_type1 = @(x) non_eqs(x,[],om0+dom);
-u2 = fsolve(eq_type1,u1);
+u2 = solver(eq_type1,u1);
 
 y = [u1 u2];
 % continuation until om reaches omend
@@ -28,7 +28,7 @@ while 1
     data.R = R;
     u0 = u2+t*R;
     eq_type2 = @(x) non_eqs(x,data,[]);
-    u3 = fsolve(eq_type2,u0);
+    u3 = solver(eq_type2,u0);
     if u3(end)>omend
         break;
     end
