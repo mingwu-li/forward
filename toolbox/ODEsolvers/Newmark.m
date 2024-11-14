@@ -1,4 +1,4 @@
-function [up,vp,varargout] = Newmark(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varargin)
+function [up,vp,varargout] = Newmark(M,N,Nu,Nv,Np,F,Fp,T0,T,x0,p,opts,varargin)
 % NEWMARK This function returns the final state of IVP: 
 %      M\ddot{u}+N(u,\dot{u})=F(t,p) [u0,v0]=x0
 % and the sensitivity of final state with respect to x0
@@ -6,12 +6,13 @@ function [up,vp,varargout] = Newmark(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varargin)
 % respect to x0, T0, T and p. The numerical integration used here is
 % Newmark method.
 %
-% [U,V,VARARGOUT] = NEWMARK(M,N,NU,NV,F,FP,T0,T,X0,P,OPTS,VARARGIN)
+% [U,V,VARARGOUT] = NEWMARK(M,N,NU,NV,Np,F,FP,T0,T,X0,P,OPTS,VARARGIN)
 %
 % M:    mass matrix
-% N:    function handle for nonlinear internal force N(u,v)
+% N:    function handle for nonlinear internal force N(u,v) or N(u,v,p)
 % Nu:   function handle for dNdu, i.e., derivative w.r.t. displacement
 % Nv:   function handle for dNdv, i.e., derivative w.r.t. velocity
+% Np:   function handle for dNdp, i.e., derivative w.r.t. parameters
 % F:    function handle for external force F(t,p)
 % Fp:   function handle for dFdp
 % T0:   initial time
@@ -36,7 +37,20 @@ dim  = numel(x0)/2; % number of dofs
 qdim = numel(p);    % number of parameters
 up   = x0(1:dim);
 vp   = x0(dim+1:2*dim);
-ap   = M\(F(T0,p)-N(up,vp));
+Npden = false; Fpden = false;
+if ~isempty(Np); Npden = true; end
+if ~isempty(Fp); Fpden = true; end
+if Npden
+    N_p = N(up,vp,p); % _p stands for evaluation at the previous step
+else
+    N_p = N(up,vp);
+end
+if Fpden
+    F_0 = F(T0,p);    % _0 stands for evaluation at the initial time
+else
+    F_0 = F(T0);
+end
+ap = M\(F_0-N_p);
 
 var  = false;
 traj = false;
@@ -62,8 +76,15 @@ end
 if var
     Jup  = [-vp,eye(dim),zeros(dim),zeros(dim,qdim)];
     Jvp  = [-ap,zeros(dim),eye(dim),zeros(dim,qdim)];
-    f0   = [zeros(dim,1),zeros(dim,2*dim),Fp(T0,p)];
-    Jap  = M\(f0-Nv(up,vp)*Jvp-Nu(up,vp)*Jup);
+    Fpp = zeros(dim,1); Npp = zeros(dim,1);
+    if Fpden; Fpp = Fp(T0,p); end
+    if Npden
+        Npp = Np(up,vp,p); Nup = Nu(up,vp,p); Nvp = Nv(up,vp,p);
+    else
+        Nup = Nu(up,vp); Nvp = Nv(up,vp);
+    end
+    f0   = [zeros(dim,1),zeros(dim,2*dim),Fpp-Npp];
+    Jap  = M\(f0-Nvp*Jvp-Nup*Jup);
 end
 
 if traj
@@ -85,10 +106,20 @@ for i=1:Nsteps
     vc = vstar+gamma/(beta*dt)*(uc-ustar);
     ac = (uc-ustar)/(beta*dt^2);
     % Newton-Raphson iteration to yield convergent results
+    if Fpden
+        Fc = F(ti,p); Fpc = Fp(ti,p);
+    else
+        Fc = F(ti); Fpc = zeros(dim,1);
+    end
     ik = 1;
-    while 1       
-        r = M*ac+N(uc,vc)-F(ti,p); % residual
-        S = M/(beta*dt^2)+gamma*Nv(uc,vc)/(beta*dt)+Nu(uc,vc);
+    while 1
+        if Npden
+            Nc = N(uc,vc,p); Nuc = Nu(uc,vc,p); Nvc = Nv(uc,vc,p); 
+        else
+            Nc = N(uc,vc); Nuc = Nu(uc,vc); Nvc = Nv(uc,vc); 
+        end
+        r = M*ac+Nc-Fc; % residual
+        S = M/(beta*dt^2)+gamma*Nvc/(beta*dt)+Nuc;
         du = -S\r;
         uc = uc+du;
         vc = vstar+gamma/(beta*dt)*(uc-ustar);
@@ -102,11 +133,16 @@ for i=1:Nsteps
     end
     if var
         % update sensitivity matrix
+        if Npden
+            Npc = Np(uc,vc,p); Nuc = Nu(uc,vc,p); Nvc = Nv(uc,vc,p); 
+        else
+            Npc = zeros(dim,1); Nuc = Nu(uc,vc); Nvc = Nv(uc,vc); 
+        end
         Justar = Jup+dt*Jvp+(0.5-beta)*dt^2*Jap;
         Jvstar = Jvp+(1-gamma)*dt*Jap;
-        S   = M/(beta*dt^2)+gamma*Nv(uc,vc)/(beta*dt)+Nu(uc,vc);
-        Fc  = [zeros(dim,1),zeros(dim,2*dim),Fp(ti,p)];
-        Juc = S\(Fc+M*Justar/(beta*dt^2)+Nv(uc,vc)*(gamma/(beta*dt)*Justar-Jvstar));
+        S   = M/(beta*dt^2)+gamma*Nvc/(beta*dt)+Nuc;
+        Fc  = [zeros(dim,1),zeros(dim,2*dim),Fpc-Npc];
+        Juc = S\(Fc+M*Justar/(beta*dt^2)+Nvc*(gamma/(beta*dt)*Justar-Jvstar));
         Jvc = Jvstar+gamma/(beta*dt)*(Juc-Justar);
         Jac = (Juc-Justar)/(beta*dt^2);
     end

@@ -52,14 +52,14 @@ switch data.order
         data.fpp = args.dfdpdphan;
         
     case 2
-        grammar   = 'M N [DNDU [DNDV]] F [DFDT [DFDP]] T0 T X0 X1 [PNAMES] P0';
+        grammar   = 'M N DNDU DNDV DNDP F [DFDP] T0 T X0 X1 [PNAMES] P0';
         args_spec = {
                'M',     '', '[num]',         'M', [], 'read', {}
                'N',     '',     '@',      'Nhan', [], 'read', {}
             'DNDU',     '',  '@|[]',   'dNduhan', [], 'read', {}
             'DNDV',     '',  '@|[]',   'dNdvhan', [], 'read', {}
+            'DNDP',     '',  '@|[]',   'dNdphan', [], 'read', {}
                'F',     '',  '@|[]',      'Fhan', [], 'read', {}
-            'DFDT',     '',  '@|[]',   'dFdthan', [], 'read', {}
             'DFDP',     '',  '@|[]',   'dFdphan', [], 'read', {}
               'T0',     '', '[num]',        'T0', [], 'read', {}
                'T',     '', '[num]',         'T', [], 'read', {}
@@ -73,8 +73,8 @@ switch data.order
         data.N  = args.Nhan;
         data.Nu = args.dNduhan;
         data.Nv = args.dNdvhan;
+        data.Np = args.dNdphan;
         data.F  = args.Fhan;
-        data.Ft = args.dFdthan;
         data.Fp = args.dFdphan;
             
     otherwise

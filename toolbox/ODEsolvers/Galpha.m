@@ -1,4 +1,4 @@
-function [up,vp,varargout] = Galpha(M,N,Nu,Nv,F,Fp,T0,T,x0,p,opts,varargin)
+function [up,vp,varargout] = Galpha(M,N,Nu,Nv,Np,F,Fp,T0,T,x0,p,opts,varargin)
 % GALPHA This function returns the final state of IVP: 
 %      M\ddot{u}+N(u,\dot{u})=F(t,p) [u0,v0]=x0
 % and the sensitivity of final state with respect to x0

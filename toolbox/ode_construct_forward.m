@@ -156,15 +156,25 @@ else
         case 2
             if nargout<3
                 [uend,vend] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
-                    data.F, data.Fp, T0, T, x0, p, data.ode_opts);
+                    data.Np, data.F, data.Fp, T0, T, x0, p, data.ode_opts);
                 % rewrite results in first-order form
                 y   = [uend;vend]-x1;                
             else
                 [uend,vend,Jup,Jvp] = data.ODEsolver(data.M, data.N, data.Nu, data.Nv, ...
-                    data.F, data.Fp, T0, T, x0, p, data.ode_opts, 'var');
+                    data.Np, data.F, data.Fp, T0, T, x0, p, data.ode_opts, 'var');
                 % rewrite results in first-order form
                 y   = [uend;vend]-x1;
-                JT  = [vend; data.M\(data.F(T0+T,p)-data.N(uend,vend))];
+                if ~isempty(data.Np)
+                    Nend = data.N(uend,vend,p); % _p stands for evaluation at the previous step
+                else
+                    Nend = data.N(uend,vend);
+                end
+                if ~isempty(data.Fp)
+                    Fend = data.F(T0+T,p);    % _0 stands for evaluation at the initial time
+                else
+                    Fend = data.F(T0+T);
+                end
+                JT  = [vend; data.M\(Fend-Nend)];
                 JT0 = [Jup(:,1); Jvp(:,1)]+JT;
                 Jx0 = [Jup(:,2:data.dim+1); Jvp(:,2:data.dim+1)];
                 Jp  = [Jup(:,data.dim+2:end); Jvp(:,data.dim+2:end)];
